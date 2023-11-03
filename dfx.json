@@ -1,0 +1,13 @@
+{
+  "canisters": {
+    "student token": {
+      "main": "src/index.ts",
+      "type": "custom",
+      "build": "npx azle student token",
+      "root": "src",
+      "ts": "src/index.ts",
+      "candid": "src/index.did",
+      "wasm": ".azle/student_token/student_token.wasm.gz"
+    }
+  }
+}

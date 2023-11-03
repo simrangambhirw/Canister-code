@@ -2,10 +2,12 @@
 class StudentTokenCanister {
     private students: Map<string, number>;
     private events: Map<string, number>;
+    private contractBalance: number;
 
     constructor() {
         this.students = new Map();
         this.events = new Map();
+        this.contractBalance = 0;
     }
 
     // for adding students with initial tokens
@@ -13,7 +15,7 @@ class StudentTokenCanister {
         this.students.set(name, initialTokens);
     }
 
-    //to award tokens to a student
+    // to award tokens to a student
     awardTokensToStudent(name: string, tokens: number) {
         if (this.students.has(name)) {
             const currentTokens = this.students.get(name)!;
@@ -45,6 +47,56 @@ class StudentTokenCanister {
             }
         }
     }
+
+    // 1. Get student's token balance
+    getStudentTokens(name: string): number | undefined {
+        return this.students.get(name);
+    }
+
+    // 2. Get event's token balance
+    getEventTokens(eventName: string): number | undefined {
+        return this.events.get(eventName);
+    }
+
+    // 3. Get total tokens in the canister
+    getTotalTokens(): number {
+        return this.contractBalance;
+    }
+
+    // 4. Allow a student to transfer tokens to the contract
+    transferTokensToContract(sender: string, tokens: number): boolean {
+        if (this.students.has(sender) && this.students.get(sender)! >= tokens) {
+            this.students.set(sender, this.students.get(sender)! - tokens);
+            this.contractBalance += tokens;
+            return true;
+        }
+        return false;
+    }
+
+    // 5. Allow a student to withdraw tokens from the contract
+    withdrawTokensFromContract(receiver: string, tokens: number): boolean {
+        if (this.contractBalance >= tokens) {
+            this.students.set(receiver, (this.students.get(receiver) || 0) + tokens);
+            this.contractBalance -= tokens;
+            return true;
+        }
+        return false;
+    }
+
+    // 6. Get contract's token balance
+    getContractBalance(): number {
+        return this.contractBalance;
+    }
+
+    // 7. Get total number of registered students
+    getStudentCount(): number {
+        return this.students.size;
+    }
+
+    // 8. Get total number of registered events
+    getEventCount(): number {
+        return this.events.size;
+    }
 }
 
 // Example for its Usage
@@ -55,6 +107,10 @@ tokenCanister.createEvent("Hackathon");
 tokenCanister.awardTokensToStudent("Alice", 50);
 tokenCanister.awardTokensForEvent("Hackathon", 30);
 tokenCanister.tradeTokens("Alice", "Bob", 20);
+
+// Additional example usage
+tokenCanister.transferTokensToContract("Alice", 25);
+tokenCanister.withdrawTokensFromContract("Bob", 10);
 
 // Output
 console.log(tokenCanister);
